@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Champions Football 2026</title>
+  <style>
+    :root{
+      --bg:#0b1d16;
+      --panel:#14352d;
+      --green:#1d7f59;
+      --grass:#2f8f61;
+      --line:#e7f3eb;
+      --text:#eafbf4;
+      --shadow:rgba(0,0,0,0.24);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1c2d28 0%, #09140f 70%);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh;
+      user-select:none;
+    }
+    #wrap{
+      width: 1120px;
+      max-width: 96vw;
+      padding: 10px;
+      background: rgba(9, 19, 17, 0.6);
+      border: 2px solid rgba(255,255,255,0.08);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.4);
+      border-radius: 12px;
+    }
+    .topbar{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .menu{
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    button{
+      background: linear-gradient(#1cb874, #137a4a);
+      color:white;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow: 0 8px 20px rgba(16,116,74,0.28);
+    }
+    button:hover{ filter:brightness(1.06); }
+    canvas{
+      width:100%;
+      height:auto;
+      display:block;
+      background: #2a9b62;
+      border: 3px solid #dfeede;
+      border-radius: 10px;
+      image-rendering: auto;
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,0.12);
+    }
+    .hud{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-top:10px; color:#ebfff5; font-weight:700;
+      font-size: 14px;
+    }
+    .small{
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <div class="topbar">
+      <div class="brand">World Champions Football 2026</div>
+      <div class="menu">
+        <button onclick="setMode('league')">League</button>
+        <button onclick="setMode('cup')">Cups</button>
+        <button onclick="setMode('transfer')">Transfers</button>
+        <button onclick="startRandomMatch()">Play Match</button>
+      </div>
+    </div>
+    <canvas id="game" width="1100" height="700"></canvas>
+    <div class="hud">
+      <div id="status">Mode: League</div>
+      <div class="small">P1: WASD + V B C T | P2: Arrows + K L N M</div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const pitch = {
+      x: 100,
+      y: 50,
+      w: 900,
+      h: 600,
+      goalW: 170,
+      goalH: 180
+    };
+
+    const CLUBS_DATA = [
+      { name: "Manchester City", colorA: "#6cabdd", colorB: "#1d4f91" },
+      { name: "Real Madrid", colorA: "#f5f5f5", colorB: "#f0a500" },
+      { name: "Barcelona", colorA: "#a50044", colorB: "#00529b" },
+      { name: "Bayern Munich", colorA: "#d7b46b", colorB: "#d9031d" },
+      { name: "Arsenal", colorA: "#efefef", colorB: "#dd2c1f" },
+      { name: "Liverpool", colorA: "#d71920", colorB: "#f7f7f7" },
+      { name: "Chelsea", colorA: "#0e5da7", colorB: "#f5f5f5" },
+      { name: "Manchester United", colorA: "#d71920", colorB: "#f5f5f5" },
+      { name: "PSG", colorA: "#161c55", colorB: "#d3a34c" },
+      { name: "Juventus", colorA: "#f1f1f1", colorB: "#1d1d1d" },
+      { name: "Inter Milan", colorA: "#1d1d1d", colorB: "#f5f5f5" },
+      { name: "AC Milan", colorA: "#f5f5f5", colorB: "#d8162d" },
+      { name: "Atletico Madrid", colorA: "#d71920", colorB: "#f3f3f3" },
+      { name: "Borussia Dortmund", colorA: "#f7d90d", colorB: "#1d1d1d" },
+      { name: "Napoli", colorA: "#12a3d9", colorB: "#e7f4ff" },
+      { name: "Sevilla", colorA: "#d3ae57", colorB: "#fcfbeb" },
+      { name: "Porto", colorA: "#f3f3f3", colorB: "#0a2d69" },
+      { name: "Benfica", colorA: "#d8b861", colorB: "#d71920" },
+      { name: "Ajax", colorA: "#d7082a", colorB: "#f5f5f5" },
+      { name: "Feyenoord", colorA: "#f4f4f4", colorB: "#d71920" },
+      { name: "Celtic", colorA: "#f8f8f8", colorB: "#35a56e" },
+      { name: "Rangers", colorA: "#f7f7f7", colorB: "#153d68" },
+      { name: "Olympiacos", colorA: "#f5f5f5", colorB: "#0a8f5d" },
+      { name: "Marseille", colorA: "#f8f5f0", colorB: "#0b1d3a" },
+      { name: "Lyon", colorA: "#f7f7f7", colorB: "#d71920" },
+      { name: "Monaco", colorA: "#e9d4a1", colorB: "#d9001e" },
+      { name: "Roma", colorA: "#f5f5f5", colorB: "#a51b2d" },
+      { name: "Lazio", colorA: "#51b4ff", colorB: "#5c0d7a" },
+      { name: "Bologna", colorA: "#f9f9f9", colorB: "#0b4cb2" },
+      { name: "Torino", colorA: "#f3f3f3", colorB: "#d71920" },
+      { name: "Sampdoria", colorA: "#1d4e89", colorB: "#f5f5f5" },
+      { name: "Verona", colorA: "#f5f5f5", colorB: "#db2121" },
+      { name: "Leeds United", colorA: "#f8f8f8", colorB: "#1d4d8c" },
+      { name: "Newcastle United", colorA: "#f4f4f4", colorB: "#2f6ae8" },
+      { name: "Tottenham", colorA: "#f5f5f5", colorB: "#0a1b46" },
+      { name: "Everton", colorA: "#1f62a5", colorB: "#f5f5f5" },
+      { name: "Aston Villa", colorA: "#6BB4D8", colorB: "#7d1f2d" },
+      { name: "Brighton", colorA: "#0a66d9", colorB: "#f4f4f4" },
+      { name: "Nottingham Forest", colorA: "#f0f0f0", colorB: "#e74b3e" },
+      { name: "Wolves", colorA: "#d4a95d", colorB: "#1e2b3a" },
+      { name: "Fulham", colorA: "#f5f5f5", colorB: "#d71920" },
+      { name: "West Ham", colorA: "#7d2d3d", colorB: "#f5f5f5" },
+      { name: "Leicester City", colorA: "#f3d56d", colorB: "#0a5fb1" },
+      { name: "Southampton", colorA: "#f8f8f8", colorB: "#d51d2d" },
+      { name: "Al Hilal", colorA: "#1d4e89", colorB: "#f0b930" },
+      { name: "Al Nassr", colorA: "#f8f8f8", colorB: "#d71920" },
+      { name: "Al Ittihad", colorA: "#f8f8f8", colorB: "#17a66d" },
+      { name: "Al Ahli", colorA: "#f7f7f7", colorB: "#0d598d" },
+      { name: "Flamengo", colorA: "#f9f9f9", colorB: "#d71920" },
+      { name: "Palmeiras", colorA: "#2f8f61", colorB: "#f5f5f5" },
+      { name: "River Plate", colorA: "#f5f5f5", colorB: "#d30d32" },
+      { name: "Boca Juniors", colorA: "#1d4e89", colorB: "#f3d12b" },
+      { name: "Santos", colorA: "#f7f7f7", colorB: "#0d2f61" },
+      { name: "Corinthians", colorA: "#f9f9f9", colorB: "#0d7597" },
+      { name: "Internacional", colorA: "#f5f5f5", colorB: "#d8242a" },
+      { name: "Grêmio", colorA: "#3d8348", colorB: "#f4f4f4" },
+      { name: "America", colorA: "#c9d4e6", colorB: "#1b2d42" },
+      { name: "Toluca", colorA: "#dd2f2e", colorB: "#f4f4f4" },
+      { name: "Pachuca", colorA: "#f1f1f1", colorB: "#1d4d8c" },
+      { name: "Club América", colorA: "#f3f3f3", colorB: "#0e5ea6" },
+      { name: "Monterrey", colorA: "#f7f7f7", colorB: "#d9031d" },
+      { name: "LA Galaxy", colorA: "#f5f5f5", colorB: "#1b3b8f" },
+      { name: "Inter Miami", colorA: "#f2f2f2", colorB: "#ef7d00" },
+      { name: "Seattle Sounders", colorA: "#5aa887", colorB: "#2b2b2b" },
+      { name: "Philadelphia Union", colorA: "#d71920", colorB: "#ffffff" },
+      { name: "FC Dallas", colorA: "#1d4e89", colorB: "#f5f5f5" },
+      { name: "Portland Timbers", colorA: "#d8d8d8", colorB: "#0a5e3b" },
+      { name: "Orlando City", colorA: "#f3f3f3", colorB: "#5ca5dd" },
+      { name: "Chicago Fire", colorA: "#f5f5f5", colorB: "#d71920" },
+      { name: "Borussia Mönchengladbach", colorA: "#f4d34a", colorB: "#2e4d9a" },
+      { name: "RB Leipzig", colorA: "#f5f5f5", colorB: "#0d3d6b" },
+      { name: "Leverkusen", colorA: "#f3f3f3", colorB: "#d71920" },
+      { name: "Freiburg", colorA: "#f7f7f7", colorB: "#4d8c3a" },
+      { name: "Valencia", colorA: "#f4f4f4", colorB: "#a2001d" },
+      { name: "Villarreal", colorA: "#f7d650", colorB: "#e4a700" },
+      { name: "Real Sociedad", colorA: "#f5f5f5", colorB: "#0d3d6b" },
+      { name: "Athletic Bilbao", colorA: "#f7f7f7", colorB: "#e4a623" },
+      { name: "Haaland", colorA: "#8ed1ff", colorB: "#1a2f6b" },
+      { name: "Mbappe", colorA: "#f7f7f7", colorB: "#0d1a46" },
+      { name: "Messi", colorA: "#d7d7d7", colorB: "#1c57a6" },
+      { name: "Saka", colorA: "#f5f5f5", colorB: "#d71920" },
+      { name: "Bellingham", colorA: "#f9fafb", colorB: "#0c173d" },
+      { name: "Vinicius", colorA: "#f3f3f3", colorB: "#d71920" },
+      { name: "Rodrygo", colorA: "#f7f7f7", colorB: "#d71920" },
+      { name: "De Bruyne", colorA: "#f3f3f3", colorB: "#0d3d6b" },
+      { name: "Muller", colorA: "#f8f8f8", colorB: "#1c5ca9" },
+      { name: "Lewandowski", colorA: "#f4f4f4", colorB: "#d71920" }
+    ];
+
+    const state = {
+      mode: "league",
+      home: null,
+      away: null,
+      players: [],
+      ball: { x: 550, y: 350, vx: 0, vy: 0, r: 8 },
+      score: { home: 0, away: 0 },
+      timer: 90,
+      lastTime: 0,
+      phase: "kickoff",
+      message: "Select a match",
+      noSecondHalf: false
+    };
+
+    const keys = {};
+
+    function clamp(v, a, b){ return Math.min(Math.max(v,a),b); }
+    function rand(min,max){ return Math.random()*(max-min)+min; }
+    function distance(ax, ay, bx, by){ return Math.hypot(ax-bx, ay-by); }
+
+    function teamFromName(name){
+      return CLUBS_DATA.find(t => t.name === name) || CLUBS_DATA[0];
+    }
+
+    function makePlayer(team, side, n, x, y, isGK = false){
+      return {
+        team,
+        side,
+        number: n,
+        x, y,
+        vx:0, vy:0,
+        radius: isGK ? 15 : 14,
+        role: isGK ? "gk" : (n === 10 ? "cm" : n === 9 ? "striker" : n === 2 ? "rb" : n === 3 ? "lb" : n === 4 ? "cb" : n === 5 ? "cb" : n === 6 ? "cm" : n === 7 ? "rw" : n === 8 ? "lw" : n === 11 ? "st" : "mid"),
+        active: false,
+        name: team.name.split(" ")[0].slice(0,2).toUpperCase() + "-" + (n + 1),
+        isGK,
+        tackled:0
+      };
+    }
+
+    function buildTeam(team, side){
+      const players = [];
+      const baseX = side === "home" ? 300 : 800;
+      const formation = [
+        [0, 350], [80, 80], [80, 220], [80, 360], [80, 520], [160, 130], [160, 260], [160, 390], [160, 530],
+        [260, 220], [260, 420]
+      ];
+      formation.forEach(([px, py], idx) => {
+        const x = side === "home" ? baseX + px : baseX - px;
+        const y = py;
+        const isGK = idx === 0;
+        const p = makePlayer(team, side, idx+1, x, y, isGK);
+        players.push(p);
+      });
+      players[0].x = side === "home" ? 180 : 920;
+      players[0].y = 350;
+      return players;
+    }
+
+    function randomTeamSet(){
+      const a = CLUBS_DATA[Math.floor(Math.random()*CLUBS_DATA.length)];
+      let b = CLUBS_DATA[Math.floor(Math.random()*CLUBS_DATA.length)];
+      while (b.name === a.name) b = CLUBS_DATA[Math.floor(Math.random()*CLUBS_DATA.length)];
+      return {home:a, away:b};
+    }
+
+    function setupMatch(teamA = teamFromName("Manchester City"), teamB = teamFromName("Real Madrid")){
+      state.home = teamA;
+      state.away = teamB;
+      state.score.home = 0;
+      state.score.away = 0;
+      state.timer = 90;
+      state.phase = "kickoff";
+      state.players = [];
+      state.players.push(...buildTeam(teamA, "home"));
+      state.players.push(...buildTeam(teamB, "away"));
+      state.players[0].active = true;
+      state.players[11].active = true;
+      state.ball.x = 550;
+      state.ball.y = 350;
+      state.ball.vx = 0;
+      state.ball.vy = 0;
+      state.message = teamA.name + " vs " + teamB.name;
+    }
+
+    function getPlayersBySide(side){
+      return state.players.filter(p => p.side === side);
+    }
+
+    function getActivePlayer(side){
+      const arr = getPlayersBySide(side);
+      return arr.find(p => p.active) || arr[0];
+    }
+
+    function setMode(m){
+      state.mode = m;
+      document.getElementById("status").textContent = "Mode: " + m.toUpperCase();
+      if (m === "cup") {
+        state.message = "Cup mode ready — quick knockout";
+      } else if (m === "transfer") {
+        state.message = "Transfers window open";
+      } else {
+        state.message = "League mode ready";
+      }
+    }
+
+    function startRandomMatch(){
+      const pair = randomTeamSet();
+      setupMatch(pair.home, pair.away);
+      document.getElementById("status").textContent = "Mode: " + state.mode.toUpperCase() + " | " + pair.home.name + " vs " + pair.away.name;
+    }
+
+    function switchPlayer(side, delta){
+      const arr = getPlayersBySide(side);
+      let index = arr.findIndex(p => p.active);
+      if (index === -1) index = 0;
+      arr.forEach(p => p.active = false);
+      index = (index + delta + arr.length) % arr.length;
+      arr[index].active = true;
+    }
+
+    function tacklePlayer(side){
+      const active = getActivePlayer(side);
+      if (!active) return;
+      const opponents = state.players.filter(p => p.side !== side);
+      let best = null;
+      let bestD = 9999;
+      opponents.forEach(p => {
+        const d = distance(active.x, active.y, p.x, p.y);
+        if (d < bestD) { bestD = d; best = p; }
+      });
+      if (best && bestD < 55){
+        const dir = { x: best.x - active.x, y: best.y - active.y };
+        const len = Math.hypot(dir.x, dir.y) || 1;
+        best.x += (dir.x / len) * 12;
+        best.y += (dir.y / len) * 12;
+      }
+    }
+
+    function passBall(side){
+      const active = getActivePlayer(side);
+      if (!active) return;
+      const target = state.players
+        .filter(p => p.side === side && p !== active)
+        .sort((a,b) => distance(active.x, active.y, a.x, a.y) - distance(active.x, active.y, b.x, b.y))[0];
+      if (target && distance(active.x, active.y, target.x, target.y) < 135) {
+        const dx = target.x - active.x;
+        const dy = target.y - active.y;
+        state.ball.x = active.x + dx * 0.2;
+        state.ball.y = active.y + dy * 0.2;
+        state.ball.vx = dx * 0.18;
+        state.ball.vy = dy * 0.18;
+      }
+    }
+
+    function shootBall(side){
+      const active = getActivePlayer(side);
+      if (!active) return;
+      const goalX = side === "home" ? pitch.x + pitch.w : pitch.x;
+      const goalY = pitch.y + pitch.h / 2;
+      const dx = goalX - active.x;
+      const dy = goalY - active.y;
+      const len = Math.hypot(dx,dy) || 1;
+      state.ball.x = active.x;
+      state.ball.y = active.y;
+      state.ball.vx = (dx / len) * 16.5;
+      state.ball.vy = (dy / len) * 10.5;
+    }
+
+    function handleInput(){
+      const p1 = getActivePlayer("home");
+      const p2 = getActivePlayer("away");
+
+      function movePlayer(player, dx, dy, speed){
+        if (!player) return;
+        player.x += dx * speed;
+        player.y += dy * speed;
+      }
+
+      if (keys["w"]) movePlayer(p1, 0, -1, 3.2);
+      if (keys["s"]) movePlayer(p1, 0, 1, 3.2);
+      if (keys["a"]) movePlayer(p1, -1, 0, 3.2);
+      if (keys["d"]) movePlayer(p1, 1, 0, 3.2);
+
+      if (keys["ArrowUp"]) movePlayer(p2, 0, -1, 3.2);
+      if (keys["ArrowDown"]) movePlayer(p2, 0, 1, 3.2);
+      if (keys["ArrowLeft"]) movePlayer(p2, -1, 0, 3.2);
+      if (keys["ArrowRight"]) movePlayer(p2, 1, 0, 3.2);
+
+      if (keys["v"]) passBall("home");
+      if (keys["k"]) passBall("away");
+      if (keys["b"]) shootBall("home");
+      if (keys["l"]) shootBall("away");
+      if (keys["c"]) switchPlayer("home", 1);
+      if (keys["n"]) switchPlayer("away", 1);
+      if (keys["t"]) tacklePlayer("home");
+      if (keys["m"]) tacklePlayer("away");
+    }
+
+    function resetKickoff(){
+      state.ball.x = 550;
+      state.ball.y = 350;
+      state.ball.vx = 0;
+      state.ball.vy = 0;
+      state.players.forEach((p, idx) => {
+        const side = p.side;
+        const baseX = side === "home" ? 300 : 800;
+        const formation = [
+          [0, 350], [80, 80], [80, 220], [80, 360], [80, 520], [160, 130], [160, 260], [160, 390], [160, 530],
+          [260, 220], [260, 420]
+        ];
+        const [px, py] = formation[idx % formation.length];
+        p.x = side === "home" ? baseX + px : baseX - px;
+        p.y = py;
+        p.vx = 0; p.vy = 0;
+      });
+      state.players[0].active = true;
+      state.players[11].active = true;
+      for (let i=0;i<state.players.length;i++) {
+        if (i !== 0 && i !== 11) state.players[i].active = false;
+      }
+    }
+
+    function updateBall(dt){
+      const ball = state.ball;
+      ball.x += ball.vx * dt * 60;
+      ball.y += ball.vy * dt * 60;
+
+      const friction = 0.985;
+      ball.vx *= friction;
+      ball.vy *= friction;
+
+      if (Math.abs(ball.vx) < 0.04) ball.vx = 0;
+      if (Math.abs(ball.vy) < 0.04) ball.vy = 0;
+
+      if (ball.x < pitch.x) { ball.x = pitch.x; ball.vx *= -0.72; }
+      if (ball.x > pitch.x + pitch.w) { ball.x = pitch.x + pitch.w; ball.vx *= -0.72; }
+      if (ball.y < pitch.y) { ball.y = pitch.y; ball.vy *= -0.72; }
+      if (ball.y > pitch.y + pitch.h) { ball.y = pitch.y + pitch.h; ball.vy *= -0.72; }
+
+      const goalTop = pitch.y + (pitch.h - pitch.goalH)/2;
+      const goalBottom = pitch.y + (pitch.h + pitch.goalH)/2;
+      const homeGoal = ball.x < pitch.x + 8 && ball.y > goalTop && ball.y < goalBottom;
+      const awayGoal = ball.x > pitch.x + pitch.w - 8 && ball.y > goalTop && ball.y < goalBottom;
+
+      if (homeGoal){
+        state.score.away += 1;
+        state.message = state.away.name + " score!";
+        resetKickoff();
+      } else if (awayGoal){
+        state.score.home += 1;
+        state.message = state.home.name + " score!";
+        resetKickoff();
+      }
+    }
+
+    function updatePlayers(dt){
+      const homeActive = getActivePlayer("home");
+      const awayActive = getActivePlayer("away");
+
+      for (const player of state.players){
+        player.x += player.vx * dt * 60;
+        player.y += player.vy * dt * 60;
+
+        if (distance(player.x, player.y, state.ball.x, state.ball.y) < player.radius + state.ball.r + 3){
+          const dir = { x: state.ball.x - player.x, y: state.ball.y - player.y };
+          const len = Math.hypot(dir.x, dir.y) || 1;
+          if (player.side === "home") {
+            player.x -= (dir.x / len) * 0.8;
+            player.y -= (dir.y / len) * 0.8;
+          } else {
+            player.x += (dir.x / len) * 0.8;
+            player.y += (dir.y / len) * 0.8;
+          }
+          state.ball.x = player.x + (dir.x / len) * (player.radius + state.ball.r + 2);
+          state.ball.y = player.y + (dir.y / len) * (player.radius + state.ball.r + 2);
+        }
+
+        const nearest = state.players.filter(p => p.side !== player.side && distance(p.x,p.y,player.x,player.y) < 60);
+        if (nearest.length > 0) {
+          const closest = nearest.sort((a,b) => distance(a.x,a.y,player.x,player.y) - distance(b.x,b.y,player.x,player.y))[0];
+          if (distance(player.x, player.y, closest.x, closest.y) < 30){
+            const dir = { x: player.x - closest.x, y: player.y - closest.y };
+            const len = Math.hypot(dir.x, dir.y) || 1;
+            player.x += (dir.x / len) * 0.8;
+            player.y += (dir.y / len) * 0.8;
+          }
+        }
+
+        player.x = clamp(player.x, pitch.x + 12, pitch.x + pitch.w - 12);
+        player.y = clamp(player.y, pitch.y + 12, pitch.y + pitch.h - 12);
+      }
+
+      if (homeActive) {
+        const dx = state.ball.x - homeActive.x;
+        const dy = state.ball.y - homeActive.y;
+        if (Math.abs(dx) < 22 && Math.abs(dy) < 22 && Math.hypot(dx, dy) < 22){
+          state.ball.x = homeActive.x + dx * 0.65;
+          state.ball.y = homeActive.y + dy * 0.65;
+        }
+      }
+
+      if (awayActive) {
+        const dx = state.ball.x - awayActive.x;
+        const dy = state.ball.y - awayActive.y;
+        if (Math.abs(dx) < 22 && Math.abs(dy) < 22 && Math.hypot(dx, dy) < 22){
+          state.ball.x = awayActive.x + dx * 0.65;
+          state.ball.y = awayActive.y + dy * 0.65;
+        }
+      }
+    }
+
+    function renderPitch(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      const g = ctx.createLinearGradient(0,0,0,canvas.height);
+      g.addColorStop(0, "#2a9b62");
+      g.addColorStop(1, "#1e7d4c");
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.fillRect(pitch.x, pitch.y, pitch.w, pitch.h);
+
+      ctx.strokeStyle = "#ebf7ee";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(pitch.x, pitch.y, pitch.w, pitch.h);
+
+      ctx.beginPath();
+      ctx.moveTo(550, pitch.y);
+      ctx.lineTo(550, pitch.y + pitch.h);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(550, 350, 80, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeRect(100, 210, 130, 280);
+      ctx.strokeRect(870, 210, 130, 280);
+      ctx.strokeRect(100, 260, 40, 180);
+      ctx.strokeRect(960, 260, 40, 180);
+      ctx.strokeRect(pitch.x, pitch.y + (pitch.h - pitch.goalH)/2, 8, pitch.goalH);
+      ctx.strokeRect(pitch.x + pitch.w - 8, pitch.y + (pitch.h - pitch.goalH)/2, 8, pitch.goalH);
+
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      for (let i = 0; i < 7; i++) {
+        ctx.fillRect(120 + i * 100, 25, 24, 18);
+        ctx.fillRect(120 + i * 100, 655, 24, 18);
+      }
+    }
+
+    function renderPlayers(){
+      state.players.forEach((p) => {
+        ctx.beginPath();
+        ctx.fillStyle = p.side === "home" ? p.team.colorA : p.team.colorB;
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = (p.active ? "#fff6af" : "#ffffff");
+        ctx.arc(p.x, p.y + 1, p.radius * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = "bold 11px Arial";
+        ctx.fillStyle = "#0b251a";
+        ctx.fillText(String(p.number), p.x - 4, p.y + 4);
+
+        if (p.active) {
+          ctx.beginPath();
+          ctx.strokeStyle = "#fffed9";
+          ctx.lineWidth = 2;
+          ctx.arc(p.x, p.y, p.radius + 8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+
+      ctx.beginPath();
+      ctx.fillStyle = "#f7f8dd";
+      ctx.arc(state.ball.x, state.ball.y, state.ball.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#111";
+      ctx.stroke();
+    }
+
+    function renderHud(){
+      ctx.fillStyle = "rgba(0,0,0,0.18)";
+      ctx.fillRect(20, 20, 220, 60);
+      ctx.font = "bold 18px Arial";
+      ctx.fillStyle = "#f7fff9";
+      ctx.fillText(state.home ? state.home.name : "Home", 30, 42);
+      ctx.fillText(state.away ? state.away.name : "Away", 30, 68);
+
+      ctx.font = "bold 34px Arial";
+      ctx.fillText(String(state.score.home), 240, 56);
+      ctx.fillText(":", 280, 56);
+      ctx.fillText(String(state.score.away), 300, 56);
+
+      ctx.font = "bold 16px Arial";
+      ctx.fillText("TIME " + Math.max(0, state.timer), 910, 48);
+
+      ctx.fillStyle = "rgba(0,0,0,0.12)";
+      ctx.fillRect(455, 18, 190, 32);
+      ctx.fillStyle = "#f4fff7";
+      ctx.font = "bold 14px Arial";
+      ctx.fillText(state.message || "Kickoff", 470, 40);
+    }
+
+    function updateMatch(dt){
+      if (!state.home || !state.away) return;
+
+      state.timer -= dt;
+      if (state.timer <= 0){
+        state.timer = 0;
+        state.message = "Full time!";
+      }
+
+      handleInput();
+      updatePlayers(dt);
+      updateBall(dt);
+    }
+
+    function gameLoop(ts){
+      const dt = Math.min((ts - state.lastTime) / 1000 || 0.016, 0.033);
+      state.lastTime = ts;
+      updateMatch(dt);
+      renderPitch();
+      renderPlayers();
+      renderHud();
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      keys[key] = true;
+      if (["w","a","s","d","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","v","b","c","t","k","l","n","m"].includes(key)) {
+        e.preventDefault();
+      }
+    });
+    window.addEventListener("keyup", (e) => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    setupMatch(teamFromName("Manchester City"), teamFromName("Real Madrid"));
+    setMode("league");
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
