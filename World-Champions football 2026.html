@@ -1,0 +1,405 @@
+<html><head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>World Champions Football 2026 - Normal</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#fff;font-family:monospace;overflow:hidden}
+#boot{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
+.gold{color:#FFD700;font-size:32px;font-weight:900;letter-spacing:4px;text-shadow:0 0 20px #FFD700}
+.btn{background:#FFD700;color:#000;padding:12px 28px;border:none;border-radius:8px;font-weight:900;margin-top:20px;cursor:pointer;font-size:14px}
+#menu{position:fixed;inset:0;background:linear-gradient(180deg,#0a2a12,#000);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:90}
+#menu h1{font-size:28px;margin-bottom:20px}
+.menuBtn{width:280px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:14px;margin:6px;border-radius:8px;font-weight:700;cursor:pointer}
+.menuBtn:hover{background:#FFD700;color:#000}
+#gameWrap{display:none;flex-direction:column;height:100vh}
+#topBar{height:44px;background:#111;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #333}
+#canvasWrap{flex:1;display:flex;align-items:center;justify-content:center;background:#1a5c2a;position:relative}
+canvas{background:#1e8c45;max-width:95vw;max-height:70vh;border:3px solid #fff;box-shadow:0 0 30px rgba(0,0,0,0.8)}
+#controls{height:110px;background:#0a0a0a;display:flex;align-items:center;justify-content:space-between;padding:8px;border-top:1px solid #333}
+.joy{width:90px;height:90px;background:rgba(255,255,255,0.1);border-radius:50%;border:2px solid rgba(255,255,255,0.2);position:relative;touch-action:none}
+.joyInner{width:40px;height:40px;background:rgba(255,255,255,0.4);border-radius:50%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.actionBtns{display:flex;gap:8px}
+.abtn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer}
+#commentary{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);padding:6px 14px;border-radius:20px;font-size:12px;min-width:200px;text-align:center;pointer-events:none}
+#continueModal{position:fixed;inset:0;background:rgba(0,0,0,0.93);display:none;align-items:center;justify-content:center;z-index:999}.cBox{background:#111;border:2px solid #FFD700;border-radius:14px;padding:22px;max-width:380px;width:92%;text-align:center}</style>
+</head>
+<body tabindex="-1">
+<div id="continueModal"><div class="cBox"><div style="font-size:40px">💾</div><h3 style="color:#FFD700">WELCOME BACK!</h3><p style="font-size:11px;color:#ccc">You removed the game. We saved where you stopped.</p><p id="saveInfo" style="font-size:11px;color:#00ff00;margin-top:6px">Checking save...</p><p style="font-size:12px;color:#FFD700;margin-top:10px;font-weight:900">CONTINUE or NEW GAME?</p><div style="display:flex;gap:10px;margin-top:14px"><button style="flex:1;background:#00ff00;color:#000;padding:12px;border:none;border-radius:8px;font-weight:900" onclick="continueSavedGame()">▶️ CONTINUE FROM WHERE STOPPED</button><button style="flex:1;background:#333;color:#fff;padding:12px;border:none;border-radius:8px;font-weight:900" onclick="startNewGameFromModal()">🆕 NEW GAME</button></div></div></div>
+
+<div id="boot">
+<div class="gold">DESVINE GAMES</div>
+<div style="color:#888;margin-top:10px;font-size:12px">PRESENTS</div>
+<div style="color:#00ff00;margin-top:6px;font-size:10px">CONTINUE FROM STOPPED + DOWNLOAD</div>
+<button class="btn" onclick="goBoot2()">TAP TO CONTINUE</button>
+<button class="btn" style="background:#00ff00;color:#000;margin-top:8px" onclick="downloadGame()">📥 DOWNLOAD GAME - ONE BUTTON</button>
+</div>
+
+<div id="boot2" style="position:fixed;inset:0;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:100">
+<div style="font-size:48px">🏆</div>
+<div class="gold" style="font-size:24px;margin-top:10px">WORLD CHAMPIONS</div>
+<div class="gold" style="font-size:20px">FOOTBALL 2026</div>
+<div style="color:#FFD700;margin-top:8px;font-size:10px">DOWNLOAD + CONTINUE FROM STOPPED</div>
+<button class="btn" onclick="goMenu()">TAP TO ENTER</button>
+<button class="btn" style="background:#00ff00;color:#000" onclick="downloadGame()">📥 DOWNLOAD GAME</button>
+</div>
+
+<div id="menu">
+<h1>⚽ WORLD CHAMPIONS 2026<br><span style="font-size:12px;color:#FFD700">DOWNLOAD + CONTINUE</span></h1>
+<div id="menuSaveStatus" style="background:rgba(255,215,0,0.15);border:1px solid #FFD700;border-radius:8px;padding:6px 12px;margin-bottom:10px;font-size:10px;min-width:280px;text-align:center">NO SAVED GAME - START NEW</div>
+<button class="menuBtn" style="background:#00ff00;color:#000;border:2px solid #fff;font-weight:900" onclick="downloadGame()">📥 DOWNLOAD GAME - ONE BUTTON</button>
+<button class="menuBtn" onclick="startMatch(false)">▶ PLAY MATCH</button>
+<button class="menuBtn" onclick="startMatch(true)">👥 MULTIPLAYER</button>
+<button class="menuBtn" style="background: rgba(0, 255, 0, 0.3); display: none;" onclick="continueSavedGame()" id="continueBtn">▶️ CONTINUE WHERE STOPPED</button>
+
+<button class="menuBtn" style="background:rgba(255,0,0,0.15)" onclick="askNewGame()">🗑️ NEW GAME - CLEAR SAVE</button>
+<button class="menuBtn">🔄 TRANSFERS $40k-$70k</button>
+<button class="menuBtn">➕ CREATE TEAM</button>
+<div style="margin-top:10px;color:#666;font-size:8px;text-align:center">DOWNLOAD BUTTON ON BOOT, BOOT2, MENU • AUTO-SAVE 3s • CONTINUE WHEN YOU REMOVE AND COME BACK</div>
+</div>
+
+<div id="gameWrap">
+<div id="topBar">
+<div><span id="scoreA">0</span> - <span id="scoreB">0</span> <span id="time">00:00</span> <span style="background:#00ff00;color:#000;padding:2px 6px;border-radius:6px;font-size:8px" id="saveBadge">AUTO SAVE 3s</span></div>
+<div style="display:flex;gap:4px">
+
+<button class="abtn" onclick="togglePause()">⏸️</button>
+<button class="abtn" onclick="doSub('A')">🔄 A <span id="subsA">0/3</span></button>
+<button class="abtn" onclick="doSub('B')">🔄 B <span id="subsB">0/3</span></button>
+<button class="abtn" style="background:#FFD700;color:#000" onclick="downloadGame()">📥 DOWNLOAD</button>
+<button class="abtn" onclick="exitWithSave()">🏠</button>
+</div>
+</div>
+<div id="canvasWrap">
+<div id="commentary">Welcome! WASD to move • V to pass • B to shoot</div>
+<canvas id="c" width="1100" height="700"></canvas>
+</div>
+<div id="controls">
+<div class="joy" id="joy1"><div class="joyInner" id="joy1Inner"></div></div>
+<div style="text-align:center">
+<div style="font-size:9px;color:#888">P1 WASD V PASS B SHOOT</div>
+<div style="font-size:9px;color:#888">P2 ARROWS K SHOOT • NORMAL 14x20 • 1100x700 WIDER • NO CLUMP 48/60px</div>
+<div class="actionBtns" style="margin-top:6px;justify-content:center">
+<button class="abtn" onclick="passBall()">V PASS</button>
+<button class="abtn" style="background:#FFD700;color:#000" onclick="shootBall()">B SHOOT</button>
+</div>
+</div>
+<div class="joy" id="joy2"><div class="joyInner" id="joy2Inner"></div></div>
+</div>
+</div>
+<script>
+const W=1100,H=700;
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+let phase='boot';
+let paused=false;
+let scoreA=0,scoreB=0,gameTime=0;
+let keys={};
+let joy1={x:0,y:0},joy2={x:0,y:0};
+let controlledA=9,controlledB=9;
+let subsA=0,subsB=0;
+let commentaryTimer=0;
+
+const FORMATION=[
+{x:0.08,y:0.5},{x:0.20,y:0.12},{x:0.20,y:0.34},{x:0.20,y:0.66},{x:0.20,y:0.88},{x:0.42,y:0.10},{x:0.42,y:0.35},{x:0.42,y:0.65},{x:0.42,y:0.90},{x:0.70,y:0.30},{x:0.70,y:0.70}
+];
+let players=[],ball={x:W/2,y:H/2,vx:0,vy:0,carrier:null};
+let ballHistory=[];
+let isMulti=false;
+
+function goBoot2(){document.getElementById('boot').style.display='none';document.getElementById('boot2').style.display='flex';setTimeout(goMenu,2500);}
+function goMenu(){document.getElementById('boot').style.display='none';document.getElementById('boot2').style.display='none';document.getElementById('gameWrap').style.display='none';document.getElementById('menu').style.display='flex';phase='menu';checkSavedGameOnBoot();}
+function startMatch(multi){
+isMulti=multi;
+document.getElementById('menu').style.display='none';
+document.getElementById('gameWrap').style.display='flex';
+initPlayers();
+phase='playing';
+requestAnimationFrame(loop);
+}
+function initPlayers(){
+players=[];
+for(let team=0;team<2;team++){
+for(let i=0;i<11;i++){
+const f=FORMATION[i];
+let x = team===0 ? f.x*W : W - f.x*W;
+let y = f.y*H;
+players.push({team,x,y,vx:0,vy:0,number:i===0?1:i,last:["HAALAND","SAKA","MESSI","MBAPPE","SALAH","KANE","BELLINGHAM","FODEN","ODEGAARD","RICE","VAN DIJK"][i]||"PLAYER",stamina:100,kit:team===0?"#6CABDD":"#C8102E",sec:team===0?"#1C2C5B":"#fff",isGK:i===0});
+}
+}
+ball={x:W/2,y:H/2,vx:0,vy:0,carrier:null};
+}
+function togglePause(){paused=!paused;setComm(paused?"PAUSED - TAP RESUME":"Game on!");}
+function doSub(team){
+if(team==='A'&&subsA<3){subsA++;document.getElementById('subsA').textContent=subsA+'/3';setComm(`Substitution Team A ${subsA}/3`);}
+if(team==='B'&&subsB<3){subsB++;document.getElementById('subsB').textContent=subsB+'/3';setComm(`Substitution Team B ${subsB}/3`);}
+}
+function setComm(txt){document.getElementById('commentary').textContent=txt;commentaryTimer=180;if('speechSynthesis' in window){let u=new SpeechSynthesisUtterance(txt);u.rate=1.1;speechSynthesis.speak(u);} }
+
+function passBall(){
+if(ball.carrier===null) return;
+let carrier=players[ball.carrier];
+if(!carrier) return;
+// find nearest teammate
+let best=null,bestD=9999;
+for(let i=0;i<players.length;i++){
+if(players[i].team!==carrier.team || i===ball.carrier) continue;
+let d=Math.hypot(players[i].x-ball.x,players[i].y-ball.y);
+if(d<bestD){bestD=d;best=i;}
+}
+if(best!==null){
+let target=players[best];
+let dx=target.x-ball.x,dy=target.y-ball.y;
+let mag=Math.hypot(dx,dy)||1;
+ball.vx=dx/mag*8; ball.vy=dy/mag*8;
+ball.carrier=null;
+setComm(`${carrier.last} passes to ${target.last}!`);
+}
+}
+function shootBall(){
+if(ball.carrier===null) return;
+let carrier=players[ball.carrier];
+if(!carrier) return;
+let targetX = carrier.team===0? W-10 : 10;
+let targetY = H/2 + (Math.random()-0.5)*80;
+let dx=targetX-ball.x,dy=targetY-ball.y;
+let mag=Math.hypot(dx,dy)||1;
+ball.vx=dx/mag*11; ball.vy=dy/mag*11;
+ball.carrier=null;
+setComm(`He shoots! ${carrier.last}!`);
+}
+
+function loop(){
+if(phase!=='playing') {requestAnimationFrame(loop); return;}
+if(!paused){
+update();
+}
+draw();
+requestAnimationFrame(loop);
+}
+
+function update(){
+gameTime+=0.016;
+document.getElementById('time').textContent=Math.floor(gameTime/60).toString().padStart(2,'0')+':'+Math.floor(gameTime%60).toString().padStart(2,'0');
+
+// ball physics
+if(ball.carrier===null){
+ball.x+=ball.vx; ball.y+=ball.vy;
+ball.vx*=0.995; ball.vy*=0.995;
+if(Math.hypot(ball.vx,ball.vy)<0.1){ball.vx=0;ball.vy=0;}
+// bounce walls
+if(ball.y<12||ball.y>H-12){ball.vy*=-0.8;ball.y=Math.max(12,Math.min(H-12,ball.y));}
+// goal check
+if(ball.x<12 && ball.y>H*0.38 && ball.y<H*0.62){
+scoreB++;document.getElementById('scoreB').textContent=scoreB;
+setComm(`GOOOAL!!! Team B scores! ${scoreA}-${scoreB}`);ballHistory=[];ball.x=W/2;ball.y=H/2;ball.vx=0;ball.vy=0;
+}
+if(ball.x>W-12 && ball.y>H*0.38 && ball.y<H*0.62){
+scoreA++;document.getElementById('scoreA').textContent=scoreA;
+setComm(`GOOOAL!!! Team A scores! ${scoreA}-${scoreB}`);ballHistory=[];ball.x=W/2;ball.y=H/2;ball.vx=0;ball.vy=0;
+}
+if(ball.x<0||ball.x>W){ball.x=W/2;ball.y=H/2;ball.vx=0;ball.vy=0;}
+// pickup
+for(let i=0;i<players.length;i++){
+let p=players[i];
+let d=Math.hypot(p.x-ball.x,p.y-ball.y);
+if(d<22){ball.carrier=i;ball.vx=0;ball.vy=0;break;}
+}
+}else{
+// ball follows carrier
+let c=players[ball.carrier];
+if(c){
+let dir = c.team===0?1:-1;
+ball.x=c.x+dir*14;
+ball.y=c.y-2;
+}
+}
+
+// controlled player movement
+let ax=0,ay=0;
+if(keys['w']) ay-=1; if(keys['s']) ay+=1; if(keys['a']) ax-=1; if(keys['d']) ax+=1;
+ax+=joy1.x; ay+=joy1.y;
+let mag=Math.hypot(ax,ay); if(mag>1){ax/=mag;ay/=mag;}
+let pA=players[controlledA];
+if(pA){pA.x+=ax*3.6; pA.y+=ay*3.6;}
+
+let bx=0,by=0;
+if(keys['arrowup']) by-=1; if(keys['arrowdown']) by+=1; if(keys['arrowleft']) bx-=1; if(keys['arrowright']) bx+=1;
+bx+=joy2.x; by+=joy2.y;
+let magB=Math.hypot(bx,by); if(magB>1){bx/=magB;by/=magB;}
+if(isMulti){
+let pB=players[controlledB+11];
+if(pB){pB.x+=bx*3.6; pB.y+=by*3.6;}
+}
+
+// AI for others
+for(let i=0;i<players.length;i++){
+if(i===controlledA) continue;
+if(isMulti && i===controlledB+11) continue;
+let p=players[i];
+if(p.isGK){
+// GK stays near goal
+let gx = p.team===0? 18 : W-18;
+let gy = H/2 + (ball.y-H/2)*0.3;
+p.x += (gx-p.x)*0.05;
+p.y += (gy-p.y)*0.05;
+}else{
+if(ball.carrier!==null && players[ball.carrier] && players[ball.carrier].team===p.team){
+// support run
+let base=FORMATION[i%11];
+let tx = base.x*W + (p.team===1? W-2*base.x*W :0) + (p.team===0?60:-60);
+let ty = base.y*H + (ball.y-H/2)*0.12;
+let dx=tx-p.x,dy=ty-p.y;
+let d=Math.hypot(dx,dy);
+if(d>8){p.x+=dx/d*1.4; p.y+=dy/d*1.4;}
+}else{
+// chase ball if nearest
+let minD=9999,minIdx=-1;
+for(let j=0;j<players.length;j++){
+if(players[j].team===p.team){let dd=Math.hypot(players[j].x-ball.x,players[j].y-ball.y); if(dd<minD){minD=dd;minIdx=j;}}
+}
+if(minIdx===i){
+let dx=ball.x-p.x,dy=ball.y-p.y;
+let d=Math.hypot(dx,dy);
+if(d>6){p.x+=dx/d*2.0; p.y+=dy/d*2.0;}
+}else{
+let base=FORMATION[i%11];
+let bxPos = base.x*W + (p.team===1? W-2*base.x*W :0);
+let byPos = base.y*H;
+p.x+=(bxPos-p.x)*0.02; p.y+=(byPos-p.y)*0.02;
+}
+}
+}
+p.x=Math.max(18,Math.min(W-18,p.x));
+p.y=Math.max(18,Math.min(H-18,p.y));
+}
+
+// ULTRA STRONG ANTI-CLUMP 3 iterations 48/60px
+for(let iter=0;iter<3;iter++){
+for(let i=0;i<players.length;i++){
+for(let j=i+1;j<players.length;j++){
+let a=players[i],b=players[j];
+let dx=b.x-a.x,dy=b.y-a.y;
+let dist=Math.hypot(dx,dy); if(dist<0.1) dist=0.1;
+let same=a.team===b.team;
+let minDist=same?48:60;
+if(dist<minDist){
+let overlap=minDist-dist;
+let nx=(a.x-b.x)/dist, ny=(a.y-b.y)/dist;
+let push=overlap*1.0+2.5;
+a.x+=nx*push; a.y+=ny*push;
+b.x-=nx*push; b.y-=ny*push;
+}
+}
+}
+}
+}
+
+function draw(){
+ctx.fillStyle='#1e8c45';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#20914b';for(let i=0;i<W;i+=80) ctx.fillRect(i,0,40,H);
+ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.strokeRect(8,8,W-16,H-16);
+ctx.beginPath();ctx.moveTo(W/2,8);ctx.lineTo(W/2,H-8);ctx.stroke();
+ctx.beginPath();ctx.arc(W/2,H/2,70,0,Math.PI*2);ctx.stroke();
+ctx.beginPath();ctx.arc(W/2,H/2,4,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+ctx.strokeRect(8,H*0.28,130,H*0.44);ctx.strokeRect(W-138,H*0.28,130,H*0.44);
+ctx.strokeRect(8,H*0.38,44,H*0.24);ctx.strokeRect(W-52,H*0.38,44,H*0.24);
+ctx.fillStyle='#fff';ctx.fillRect(0,H*0.38,8,H*0.24);ctx.fillRect(W-8,H*0.38,8,H*0.24);
+// referee
+let refX=W/2+(ball.x-W/2)*0.3, refY=H/2+(ball.y-H/2)*0.3;
+ctx.fillStyle='#000';ctx.fillRect(refX-7,refY-12,14,20);ctx.fillStyle='#e8c4a0';ctx.beginPath();ctx.arc(refX,refY-16,6,0,Math.PI*2);ctx.fill();
+// offside line
+// players
+players.forEach((p,i)=>{
+let isCtrlA=i===controlledA, isCtrlB=isMulti && i===controlledB+11;
+let isCtrl=isCtrlA||isCtrlB;
+let sizeW=isCtrl?18:14, sizeH=isCtrl?26:20;
+ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(p.x,p.y+14,10,3,0,0,Math.PI*2);ctx.fill();
+if(isCtrl){ctx.strokeStyle=isCtrlA?'#FFD700':'#00e5ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,20,0,Math.PI*2);ctx.stroke();}
+ctx.fillStyle=p.kit;ctx.fillRect(p.x-sizeW/2,p.y-sizeH/2,sizeW,sizeH);
+ctx.fillStyle=p.sec;ctx.fillRect(p.x-sizeW/2,p.y-2,sizeW,4);
+ctx.fillStyle='#fff';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText(p.number,p.x,p.y+1);
+ctx.fillStyle='#e8c4a0';ctx.beginPath();ctx.arc(p.x,p.y-sizeH/2-5,6,0,Math.PI*2);ctx.fill();
+let last=p.last.slice(0,7).toUpperCase();
+ctx.font='8px monospace';let tw=ctx.measureText(last).width+6;
+let nx=p.x-tw/2, ny=p.y-sizeH/2-20;
+ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(nx,ny,tw,10);
+ctx.fillStyle=isCtrlA?'#FFD700':isCtrlB?'#00e5ff':'#fff';ctx.fillText(last,p.x,ny+7);
+if(isCtrl){let badge=isCtrlA?'P1':'P2';ctx.fillStyle=isCtrlA?'#FFD700':'#00e5ff';ctx.fillRect(p.x+sizeW/2+2,p.y-sizeH/2-12,18,10);ctx.fillStyle='#000';ctx.font='bold 8px sans-serif';ctx.fillText(badge,p.x+sizeW/2+11,p.y-sizeH/2-5);}
+});
+// ball bigger 12px
+if(ball.carrier!==null){
+let car=players[ball.carrier];
+if(car){ctx.strokeStyle=car.team===0?'#FFD700':'#00e5ff';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.arc(car.x,car.y,26,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
+}
+ctx.fillStyle='#fff';ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(ball.x,ball.y,12,0,Math.PI*2);ctx.fill();ctx.stroke();
+ctx.fillStyle='#000';ctx.beginPath();ctx.arc(ball.x-3,ball.y-2,2,0,Math.PI*2);ctx.fill();
+if(paused){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 40px monospace';ctx.textAlign='center';ctx.fillText('PAUSED',W/2,H/2);}
+}
+
+window.addEventListener('keydown',e=>{
+keys[e.key.toLowerCase()]=true;
+if(e.key==='v'||e.key==='V') passBall();
+if(e.key==='b'||e.key===' '||e.key==='m'||e.key==='o') shootBall();
+if(e.key==='p'||e.key==='P') togglePause();
+});
+window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+
+function setupJoy(id,joyRef,innerId){
+let el=document.getElementById(id),inner=document.getElementById(innerId);
+let dragging=false;
+function getPos(t){
+let rect=el.getBoundingClientRect();
+let cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+let clientX=t.clientX|| (t.touches&&t.touches[0].clientX), clientY=t.clientY|| (t.touches&&t.touches[0].clientY);
+let dx=(clientX-cx)/(rect.width/2), dy=(clientY-cy)/(rect.height/2);
+let mag=Math.hypot(dx,dy); if(mag>1){dx/=mag;dy/=mag;}
+return {dx,dy};
+}
+el.addEventListener('touchstart',e=>{dragging=true;let p=getPos(e.touches[0]);joyRef.x=p.dx;joyRef.y=p.dy;inner.style.transform=`translate(calc(-50% + ${p.dx*25}px), calc(-50% + ${p.dy*25}px))`;e.preventDefault();});
+el.addEventListener('touchmove',e=>{if(!dragging) return;let p=getPos(e.touches[0]);joyRef.x=p.dx;joyRef.y=p.dy;inner.style.transform=`translate(calc(-50% + ${p.dx*25}px), calc(-50% + ${p.dy*25}px))`;e.preventDefault();},{passive:false});
+el.addEventListener('touchend',()=>{dragging=false;joyRef.x=0;joyRef.y=0;inner.style.transform='translate(-50%,-50%)';});
+el.addEventListener('mousedown',e=>{dragging=true;});
+window.addEventListener('mousemove',e=>{if(!dragging) return;let rect=el.getBoundingClientRect();let cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;let dx=(e.clientX-cx)/(rect.width/2),dy=(e.clientY-cy)/(rect.height/2);let mag=Math.hypot(dx,dy);if(mag>1){dx/=mag;dy/=mag;}joyRef.x=dx;joyRef.y=dy;inner.style.transform=`translate(calc(-50% + ${dx*25}px), calc(-50% + ${dy*25}px))`;});
+window.addEventListener('mouseup',()=>{if(dragging){dragging=false;joyRef.x=0;joyRef.y=0;inner.style.transform='translate(-50%,-50%)';}});
+}
+setupJoy('joy1',joy1,'joy1Inner');
+setupJoy('joy2',joy2,'joy2Inner');
+function getSave(){try{return JSON.parse(localStorage.getItem('wc2026_save')||'null');}catch(e){return null;}}
+function saveNow(){if(phase!=='playing')return;let data={scoreA,scoreB,gameTime,players:players.map(p=>({x:p.x,y:p.y})),ball:{x:ball.x,y:ball.y,vx:ball.vx,vy:ball.vy,carrier:ball.carrier},controlledA,timestamp:Date.now(),scoreText:scoreA+'-'+scoreB+' at '+String(Math.floor(gameTime/60)).padStart(2,'0')+':'+String(Math.floor(gameTime%60)).padStart(2,'0')};localStorage.setItem('wc2026_save',JSON.stringify(data));localStorage.setItem('wc2026_hasSave','1');let si=document.getElementById('saveInfo');if(si)si.textContent='💾 SAVED: '+data.scoreText+' | '+scoreA+'-'+scoreB;let ms=document.getElementById('menuSaveStatus');if(ms)ms.textContent='💾 SAVED: '+data.scoreText+' - FOUND SAVE';let badge=document.getElementById('saveBadge');if(badge){badge.textContent='SAVED '+data.scoreText;setTimeout(()=>{badge.textContent='AUTO SAVE 3s';},2000);}console.log('💾 Saved',data.scoreText);}
+function saveNowManual(){if(phase!=='playing'){alert('Start a match first, then press SAVE!');return;}saveNow();alert('💾 GAME SAVED!\n\nScore: '+scoreA+'-'+scoreB+'\nTime: '+Math.floor(gameTime/60)+':'+String(Math.floor(gameTime%60)).padStart(2,'0')+'\n\nIf you remove the game and come back, you will be asked CONTINUE FROM WHERE STOPPED');setComm('💾 Saved! '+scoreA+'-'+scoreB);}
+function exitWithSave(){saveNow();if(confirm('Exit to menu? Game SAVED - when you come back you can CONTINUE FROM WHERE STOPPED.\n\nOK = Save and go to menu')){goMenu();}}
+function downloadGame(){let html=document.documentElement.outerHTML;let blob=new Blob([html],{type:'text/html'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='World-Champions-2026-DOWNLOAD-CONTINUE.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);alert('📥 DOWNLOADED! World Champions 2026 with CONTINUE + DOWNLOAD buttons');}
+function checkSavedGameOnBoot(){let save=getSave();if(save&&localStorage.getItem('wc2026_hasSave')==='1'){let info='Saved: '+save.scoreText+' | Score '+save.scoreA+'-'+save.scoreB+' | Time '+Math.floor(save.gameTime/60)+':'+String(Math.floor(save.gameTime%60)).padStart(2,'0');let si=document.getElementById('saveInfo');if(si)si.textContent=info;let ms=document.getElementById('menuSaveStatus');if(ms)ms.textContent='💾 FOUND SAVE: '+info+' - ASKING CONTINUE?';let modal=document.getElementById('continueModal');if(modal)modal.style.display='flex';let cb=document.getElementById('continueBtn');if(cb)cb.style.display='block';return true;}else{let ms=document.getElementById('menuSaveStatus');if(ms)ms.textContent='NO SAVED GAME - START NEW';let cb=document.getElementById('continueBtn');if(cb)cb.style.display='none';return false;}}
+function continueSavedGame(){let save=getSave();if(!save){alert('No saved game! Play a match first - it auto-saves every 3 seconds where you stopped.');return;}document.getElementById('continueModal').style.display='none';document.getElementById('boot').style.display='none';let b2=document.getElementById('boot2');if(b2)b2.style.display='none';document.getElementById('menu').style.display='none';document.getElementById('gameWrap').style.display='flex';initPlayers();scoreA=save.scoreA||0;scoreB=save.scoreB||0;gameTime=save.gameTime||0;if(save.players&&save.players.length===players.length){for(let i=0;i<players.length;i++){players[i].x=save.players[i].x;players[i].y=save.players[i].y;}}ball.x=save.ball?.x||W/2;ball.y=save.ball?.y||H/2;ball.vx=save.ball?.vx||0;ball.vy=save.ball?.vy||0;ball.carrier=save.ball?.carrier||null;controlledA=save.controlledA||9;let sa=document.getElementById('scoreA');if(sa)sa.textContent=scoreA;let sb=document.getElementById('scoreB');if(sb)sb.textContent=scoreB;phase='playing';let comm=document.getElementById('commentary');if(comm)comm.textContent='▶️ Continued from where you stopped! '+save.scoreText+' - Welcome back!';requestAnimationFrame(loop);}
+function startNewGameFromModal(){if(confirm('Start NEW GAME? This will delete where you stopped?')){localStorage.removeItem('wc2026_save');localStorage.removeItem('wc2026_hasSave');document.getElementById('continueModal').style.display='none';goMenu();}}
+function askNewGame(){if(confirm('Start NEW GAME? This will DELETE your saved progress where you stopped.\n\nOK = New Game (delete save)\nCancel = Keep save and continue')){localStorage.removeItem('wc2026_save');localStorage.removeItem('wc2026_hasSave');let ms=document.getElementById('menuSaveStatus');if(ms)ms.textContent='NO SAVED GAME - START NEW';let cb=document.getElementById('continueBtn');if(cb)cb.style.display='none';alert('🗑️ Save cleared! New game will start.');}}
+window.addEventListener('beforeunload',function(e){if(phase==='playing'){saveNow();e.preventDefault();e.returnValue='Game saved! When you come back, you can CONTINUE from where you stopped.';return e.returnValue;}});
+window.addEventListener('load',()=>{setTimeout(checkSavedGameOnBoot,800);});
+function autoSaveLoop(){if(phase==='playing')saveNow();setTimeout(autoSaveLoop,3000);}setTimeout(autoSaveLoop,3000);
+setTimeout(()=>{if(phase==='boot') goBoot2();},3000);
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+
+</body></html>
